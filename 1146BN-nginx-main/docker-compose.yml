@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  service-discovery:
+    build:
+      context: ./service-discovery
+    container_name: service-discovery
+    ports: ["8083:8080"]
+    volumes:
+      - ./service-discovery:/app
+      - ~/.m2:/root/.m2
+    networks: [app-network]
+
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    environment:
+      - JWT_SECRET=UmaSenhaLongaParaGerarHash
+    depends_on: [service-discovery]
+    networks: [app-network]
+
+  gateway-service:
+    build:
+      context: ./gateway-service
+    container_name: gateway-service
+    environment:
+      - JWT_SECRET=UmaSenhaLongaParaGerarHash
+    ports: ["8080:8080"]
+    depends_on: [service-discovery, auth-service]
+    networks: [app-network]
+
+  bets-service:
+    build: { context: ./bets-service }
+    container_name: bets-service
+    depends_on: [service-discovery]
+    networks: [app-network]
+
+  history-service:
+    build: { context: ./history-service }
+    container_name: history-service
+    depends_on: [service-discovery]
+    networks: [app-network]
+
+  matches-service:
+    build: { context: ./matches-service }
+    container_name: matches-service
+    depends_on: [service-discovery]
+    networks: [app-network]
+
+  tournaments-service:
+    build: { context: ./tournaments-service }
+    container_name: tournaments-service
+    depends_on: [service-discovery]
+    networks: [app-network]
+
+  audit-service:
+    build: { context: ./audit-service }
+    container_name: audit-service
+    depends_on: [service-discovery]
+    networks: [app-network]
+
+networks:
+  app-network:
+    driver: bridge
